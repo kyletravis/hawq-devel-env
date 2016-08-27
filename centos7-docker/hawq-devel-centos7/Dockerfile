@@ -63,4 +63,15 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
  cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
  chmod 0600 ~/.ssh/authorized_keys
 
+# build hawq
+RUN git clone https://github.com/apache/incubator-hawq.git /data/hawq && \
+ cd /data/hawq && \
+ ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
+ make -j8 install && \
+ sed 's|localhost|centos7-namenode|g' -i /data/hawq-devel/etc/hawq-site.xml && \
+ echo 'centos7-datanode1' >  /data/hawq-devel/etc/slaves && \
+ echo 'centos7-datanode2' >>  /data/hawq-devel/etc/slaves && \
+ echo 'centos7-datanode3' >>  /data/hawq-devel/etc/slaves && \
+ source /data/hawq-devel/greenplum_path.sh
+ 
 WORKDIR /data

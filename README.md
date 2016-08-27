@@ -157,7 +157,7 @@ git clone https://github.com/apache/incubator-hawq.git /data/hawq
 ```
 cd /data/hawq
 ./configure --prefix=/data/hawq-devel
-make -j6 install
+make -j8 install
 ```
 * modify Apache HAWQ configuration
 ```
