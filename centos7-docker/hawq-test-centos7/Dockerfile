@@ -1,6 +1,6 @@
-FROM mayjojo/hawq-devel:centos7
+FROM kyletravis/hawq-devel:centos7
 
-MAINTAINER Zhanwei Wang <wangzw@wangzw.org>
+MAINTAINER Kyle Travis <kyle@kyletravis.com>
 
 USER root
 

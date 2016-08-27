@@ -30,11 +30,11 @@ build:
 
 build-hawq-devel-$(OS_VERSION): $(TOP_DIR)/hawq-devel-$(OS_VERSION)/Dockerfile
 	@echo build hawq-devel:$(OS_VERSION) image
-	docker build -t mayjojo/hawq-devel:$(OS_VERSION) $(TOP_DIR)/hawq-devel-$(OS_VERSION)/
+	docker build -t kyletravis/hawq-devel:$(OS_VERSION) $(TOP_DIR)/hawq-devel-$(OS_VERSION)/
 
 build-hawq-test-$(OS_VERSION): $(TOP_DIR)/hawq-test-$(OS_VERSION)/Dockerfile
 	@echo build hawq-test:$(OS_VERSION) image
-	docker build -t mayjojo/hawq-test:$(OS_VERSION) $(TOP_DIR)/hawq-test-$(OS_VERSION)/
+	docker build -t kyletravis/hawq-test:$(OS_VERSION) $(TOP_DIR)/hawq-test-$(OS_VERSION)/
 
 create-data-container:
 	@echo create ${CLUSTER_ID}-data container
@@ -44,9 +44,9 @@ create-data-container:
 	fi
 	@if [ -z "`docker ps -a --filter="name=${CLUSTER_ID}-data$$" | grep -v CONTAINER`" ]; then \
 		if [ -z "$(LOCAL)" ]; then \
-			docker create -v /data --name=${CLUSTER_ID}-data mayjojo/hawq-devel:$(OS_VERSION) /bin/true; \
+			docker create -v /data --name=${CLUSTER_ID}-data kyletravis/hawq-devel:$(OS_VERSION) /bin/true; \
 		else \
-			docker create -v $(LOCAL):/data --name=${CLUSTER_ID}-data mayjojo/hawq-devel:$(OS_VERSION) /bin/true; \
+			docker create -v $(LOCAL):/data --name=${CLUSTER_ID}-data kyletravis/hawq-devel:$(OS_VERSION) /bin/true; \
 		fi \
 	else \
 		echo "${CLUSTER_ID}-data container already exist!"; \
@@ -79,7 +79,7 @@ run-namenode-container:
 	@echo "run ${CLUSTER_ID}-namenode container"
 	@if [ -z "`docker ps -a --filter="name=${CLUSTER_ID}-namenode" | grep -v CONTAINER`" ]; then \
 		docker run -itd --net=$(NETWORK) --hostname=${CLUSTER_ID}-namenode --name=${CLUSTER_ID}-namenode \
-			--volumes-from ${CLUSTER_ID}-data mayjojo/hawq-test:$(OS_VERSION); \
+			--volumes-from ${CLUSTER_ID}-data kyletravis/hawq-test:$(OS_VERSION); \
 	else \
 		echo "${CLUSTER_ID}-namenode container already exist!"; \
 	fi
@@ -89,7 +89,7 @@ run-datanode-container:
 	@if [ -z "`docker ps -a --filter="name=${CLUSTER_ID}-datanode$(CUR_DATANODE)" | grep -v CONTAINER`" ]; then \
 		docker run -itd --net=$(NETWORK) --hostname=${CLUSTER_ID}-datanode$(CUR_DATANODE) \
 			--name=${CLUSTER_ID}-datanode$(CUR_DATANODE) -e NAMENODE=${CLUSTER_ID}-namenode \
-		  --volumes-from ${CLUSTER_ID}-data mayjojo/hawq-test:$(OS_VERSION); \
+		  --volumes-from ${CLUSTER_ID}-data kyletravis/hawq-test:$(OS_VERSION); \
 	else \
 		echo "${CLUSTER_ID}-datanode$(CUR_DATANODE) container already exist!"; \
 	fi
@@ -186,8 +186,8 @@ remove-data:
 
 pull:
 	@echo latest images
-	docker pull mayjojo/hawq-devel:$(OS_VERSION)
-	docker pull mayjojo/hawq-test:$(OS_VERSION)
+	docker pull kyletravis/hawq-devel:$(OS_VERSION)
+	docker pull kyletravis/hawq-test:$(OS_VERSION)
 
 clean:
 	@make -f $(THIS_MAKEFILE_PATH) stop 2>&1 >/dev/null || true
