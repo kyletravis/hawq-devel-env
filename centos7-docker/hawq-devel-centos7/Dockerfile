@@ -11,7 +11,7 @@ RUN curl -L "https://bintray.com/wangzw/rpm/rpm" -o /etc/yum.repos.d/bintray-wan
 # install all software we need
 RUN yum install -y epel-release && \
  yum makecache && \
- yum install -y man passwd sudo tar which git mlocate links make bzip2 net-tools \
+ yum install -y man passwd sudo tar which git mlocate links make bzip2 net-tools R perl postgresql-contrib \
  autoconf automake libtool m4 gcc gcc-c++ gdb bison flex cmake gperf maven indent \
  libuuid-devel krb5-devel libgsasl-devel expat-devel libxml2-devel \
  perl-ExtUtils-Embed pam-devel python-devel libcurl-devel snappy-devel \
@@ -26,7 +26,7 @@ RUN yum install -y epel-release && \
 RUN git clone https://github.com/google/googletest.git && \
  cd googletest && \
  mkdir build && cd build && \
- cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make all install
+ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make -j8 all install
 
 # setup ssh server and keys for root
 RUN sshd-keygen && \
@@ -42,7 +42,7 @@ RUN echo "#!/bin/sh" > /etc/profile.d/java.sh && \
 # install libyarn
 RUN mkdir -p /tmp/build && \
  cd /tmp/build && git clone --depth=1 https://github.com/apache/incubator-hawq.git . && cd depends/libyarn && mkdir build && cd build && \
- ../bootstrap --prefix=/usr && make && make install && ldconfig && \
+ ../bootstrap --prefix=/usr && make -j8 && make install && ldconfig && \
  rm -rf /tmp/build
 
 # create user gpadmin since HAWQ cannot run under root
@@ -67,7 +67,7 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
 RUN git clone https://github.com/apache/incubator-hawq.git /data/hawq && \
  cd /data/hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
- make -j8 install && \
+ make -j8 && make install && \
  sed 's|localhost|centos7-namenode|g' -i /data/hawq-devel/etc/hawq-site.xml && \
  echo 'centos7-datanode1' >  /data/hawq-devel/etc/slaves && \
  echo 'centos7-datanode2' >>  /data/hawq-devel/etc/slaves && \
