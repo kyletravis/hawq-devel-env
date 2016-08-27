@@ -5,14 +5,12 @@ MAINTAINER Kyle Travis <kyle@kyletravis.com>
 # install document with yum
 RUN sed -i 's/tsflags=nodocs//g' /etc/yum.conf
 
-# add yum repo
-RUN curl -L "https://bintray.com/wangzw/rpm/rpm" -o /etc/yum.repos.d/bintray-wangzw-rpm.repo
-
 # install all software we need
+RUN yum update -y
 RUN yum install -y epel-release && \
  yum makecache && \
  yum install -y man passwd sudo tar which git mlocate links make bzip2 net-tools R perl postgresql-contrib \
- autoconf automake libtool m4 gcc gcc-c++ gdb bison flex cmake gperf maven indent \
+ autoconf automake libtool m4 gcc gcc-c++ gdb bison flex cmake gperf maven indent wget \
  libuuid-devel krb5-devel libgsasl-devel expat-devel libxml2-devel \
  perl-ExtUtils-Embed pam-devel python-devel libcurl-devel snappy-devel \
  thrift-devel libyaml-devel libevent-devel bzip2-devel openssl-devel \
@@ -21,6 +19,14 @@ RUN yum install -y epel-release && \
  apache-ivy java-1.7.0-openjdk-devel \
  openssh-clients openssh-server && \
  yum clean all
+
+# install cmake 3
+RUN wget https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz && \
+ tar -zxf cmake-3.6.1.tar.gz && \ 
+ cd cmake-3.6.1 && \
+ ./bootstrap && \
+ make -j8 && \
+ make install
 
 # install google test package
 RUN git clone https://github.com/google/googletest.git && \
@@ -64,10 +70,11 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
  chmod 0600 ~/.ssh/authorized_keys
 
 # build hawq
-RUN git clone https://github.com/apache/incubator-hawq.git /data/hawq && \
- cd /data/hawq && \
+RUN git clone https://github.com/apache/incubator-hawq.git /data/hawq 
+RUN cd /data/hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
- make -j8 && make install && \
+ make -w -j8 && \
+ make install && \
  sed 's|localhost|centos7-namenode|g' -i /data/hawq-devel/etc/hawq-site.xml && \
  echo 'centos7-datanode1' >  /data/hawq-devel/etc/slaves && \
  echo 'centos7-datanode2' >>  /data/hawq-devel/etc/slaves && \
