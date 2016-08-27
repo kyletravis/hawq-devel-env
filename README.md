@@ -2,8 +2,6 @@
 
 hawq-devel-env is the docker images and scripts to help developers of Apache HAWQ to setup building and testing environment with docker.
 
-We currently support CentOS 6 and CentOS 7, the usage for different platform is the same. We take CentOS 7 as an example in this document.
-
 # Install docker
 * following the instructions to install docker.
 https://docs.docker.com/
