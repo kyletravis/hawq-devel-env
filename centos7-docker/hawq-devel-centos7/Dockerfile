@@ -11,7 +11,7 @@ RUN curl -L "https://bintray.com/wangzw/rpm/rpm" -o /etc/yum.repos.d/bintray-wan
 # install all software we need
 RUN yum install -y epel-release && \
  yum makecache && \
- yum install -y man passwd sudo tar which git mlocate links make bzip2 \
+ yum install -y man passwd sudo tar which git mlocate links make bzip2 net-tools \
  autoconf automake libtool m4 gcc gcc-c++ gdb bison flex cmake gperf maven indent \
  libuuid-devel krb5-devel libgsasl-devel expat-devel libxml2-devel \
  perl-ExtUtils-Embed pam-devel python-devel libcurl-devel snappy-devel \
