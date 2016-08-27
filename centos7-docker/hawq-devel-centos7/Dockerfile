@@ -16,7 +16,7 @@ RUN yum install -y epel-release && \
  thrift-devel libyaml-devel libevent-devel bzip2-devel openssl-devel \
  openldap-devel protobuf-devel readline-devel net-snmp-devel apr-devel \
  libesmtp-devel xerces-c-devel python-pip json-c-devel libhdfs3-devel \
- apache-ivy java-1.7.0-openjdk-devel \
+ apache-ivy java-1.6.0-openjdk-devel java-1.7.0-openjdk-devel \
  openssh-clients openssh-server && \
  yum clean all
 
@@ -25,14 +25,14 @@ RUN wget https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz && \
  tar -zxf cmake-3.6.1.tar.gz && \ 
  cd cmake-3.6.1 && \
  ./bootstrap && \
- make -j8 && \
+ make -j32 && \
  make install
 
 # install google test package
 RUN git clone https://github.com/google/googletest.git && \
  cd googletest && \
  mkdir build && cd build && \
- cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make -j8 all install
+ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make -j32 all install
 
 # setup ssh server and keys for root
 RUN sshd-keygen && \
@@ -46,10 +46,10 @@ RUN echo "#!/bin/sh" > /etc/profile.d/java.sh && \
  chmod a+x /etc/profile.d/java.sh
 
 # install libyarn
-RUN mkdir -p /tmp/build && \
- cd /tmp/build && git clone --depth=1 https://github.com/apache/incubator-hawq.git . && cd depends/libyarn && mkdir build && cd build && \
- ../bootstrap --prefix=/usr && make -j8 && make install && ldconfig && \
- rm -rf /tmp/build
+RUN mkdir yarnbuild && cd yarnbuild && \
+ git clone --depth=1 https://github.com/apache/incubator-hawq.git . && \
+ cd yarnbuild/depends/libyarn && mkdir build && cd build && \
+ ../bootstrap --prefix=/usr && make -j32 && make install && ldconfig
 
 # create user gpadmin since HAWQ cannot run under root
 RUN groupadd -g 1000 gpadmin && \
@@ -63,6 +63,7 @@ ENV BASEDIR /data
 RUN mkdir -p /data && chmod 777 /data
 
 USER gpadmin
+ENV JAVA_HOME /etc/alternatives/java_sdk
 
 # setup ssh client keys for gpadmin
 RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
@@ -70,10 +71,10 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
  chmod 0600 ~/.ssh/authorized_keys
 
 # build hawq
-RUN git clone https://github.com/apache/incubator-hawq.git /data/hawq 
-RUN cd /data/hawq && \
+RUN git clone https://github.com/apache/incubator-hawq.git incubator-hawq && \
+ cd incubator-hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
- make -w -j8 && \
+ make -w -j32 && \
  make install && \
  sed 's|localhost|centos7-namenode|g' -i /data/hawq-devel/etc/hawq-site.xml && \
  echo 'centos7-datanode1' >  /data/hawq-devel/etc/slaves && \
