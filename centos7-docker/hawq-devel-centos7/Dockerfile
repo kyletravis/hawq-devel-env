@@ -64,6 +64,7 @@ RUN mkdir -p /data && chmod 777 /data && chown -R gpadmin: /tmp/build
 
 USER gpadmin
 ENV JAVA_HOME /etc/alternatives/java_sdk
+ENV LD_LIBRARY_PATH="${JDK_HOME}/lib:${LD_LIBRARY_PATH}"
 
 # setup ssh client keys for gpadmin
 RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
