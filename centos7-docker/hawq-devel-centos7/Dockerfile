@@ -49,8 +49,7 @@ RUN echo "#!/bin/sh" > /etc/profile.d/java.sh && \
 RUN mkdir -p /tmp/build && \
  cd /tmp/build && git clone https://github.com/apache/incubator-hawq.git && cd /tmp/build/incubator-hawq/depends/libyarn && \
  mkdir build && cd build && \
- ../bootstrap --prefix=/usr && make && make install && ldconfig && \
- rm -rf /tmp/build
+ ../bootstrap --prefix=/usr && make -j8 && make install && ldconfig
 
 # create user gpadmin since HAWQ cannot run under root
 RUN groupadd -g 1000 gpadmin && \
@@ -72,8 +71,7 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
  chmod 0600 ~/.ssh/authorized_keys
 
 # build hawq
-RUN git clone https://github.com/apache/incubator-hawq.git incubator-hawq && \
- cd incubator-hawq && \
+RUN cd /tmp/build/incubator-hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
  make -w -j8 && \
  make install && \
