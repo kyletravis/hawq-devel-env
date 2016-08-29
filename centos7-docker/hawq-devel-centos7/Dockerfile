@@ -60,7 +60,7 @@ RUN groupadd -g 1000 gpadmin && \
 RUN sed -i -e 's|Defaults    requiretty|#Defaults    requiretty|' /etc/sudoers
 
 ENV BASEDIR /data
-RUN mkdir -p /data && chmod 777 /data
+RUN mkdir -p /data && chmod 777 /data && chown -R gpadmin: /tmp/build
 
 USER gpadmin
 ENV JAVA_HOME /etc/alternatives/java_sdk
