@@ -1,5 +1,7 @@
 FROM centos:7
 
+ENV MAKEOPTS="-j32"
+
 MAINTAINER Kyle Travis <kyle@kyletravis.com>
 
 # install document with yum
@@ -25,14 +27,14 @@ RUN wget https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz && \
  tar -zxf cmake-3.6.1.tar.gz && \ 
  cd cmake-3.6.1 && \
  ./bootstrap && \
- make -j8 && \
+ make ${MAKEOPTS} && \
  make install
 
 # install google test package
 RUN git clone https://github.com/google/googletest.git && \
  cd googletest && \
  mkdir build && cd build && \
- cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make -j8 all install
+ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make ${MAKEOPTS} all install
 
 # setup ssh server and keys for root
 RUN sshd-keygen && \
@@ -49,7 +51,7 @@ RUN echo "#!/bin/sh" > /etc/profile.d/java.sh && \
 RUN mkdir -p /tmp/build && \
  cd /tmp/build && git clone https://github.com/apache/incubator-hawq.git && cd /tmp/build/incubator-hawq/depends/libyarn && \
  mkdir build && cd build && \
- ../bootstrap --prefix=/usr && make -j8 && make install && ldconfig
+ ../bootstrap --prefix=/usr && make ${MAKEOPTS} && make install && ldconfig
 
 # create user gpadmin since HAWQ cannot run under root
 RUN groupadd -g 1000 gpadmin && \
@@ -74,7 +76,7 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
 # build hawq
 RUN cd /tmp/build/incubator-hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
- make -w -j8 && \
+ make -w ${MAKEOPTS} && \
  make install && \
  sed 's|localhost|centos7-namenode|g' -i /data/hawq-devel/etc/hawq-site.xml && \
  echo 'centos7-datanode1' >  /data/hawq-devel/etc/slaves && \
