@@ -66,7 +66,7 @@ RUN mkdir -p /data && chmod 777 /data && chown -R gpadmin: /tmp/build
 
 USER gpadmin
 ENV JAVA_HOME="/etc/alternatives/java_sdk"
-ENV LD_LIBRARY_PATH="${JAVA_HOME}/lib:${LD_LIBRARY_PATH}"
+ENV LDFLAGS="${LDFLAGS} -L${JAVA_HOME}/jre/lib/amd64/server"
 
 # setup ssh client keys for gpadmin
 RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
@@ -76,7 +76,7 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
 # build hawq
 RUN cd /tmp/build/incubator-hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
- make ${MAKEOPTS} -e LD_LIBRARY_PATH=${LD_LIBRARY_PATH} && \
+ make ${MAKEOPTS} && \
  make install && \
  sed 's|localhost|centos7-namenode|g' -i /data/hawq-devel/etc/hawq-site.xml && \
  echo 'centos7-datanode1' >  /data/hawq-devel/etc/slaves && \
