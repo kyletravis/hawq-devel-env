@@ -1,9 +1,10 @@
 FROM centos:7
 
-ENV MAKEOPTS="-j32"
-ENV GIT="/usr/local/bin/git clone -j8"
-
 MAINTAINER Kyle Travis <kyle@kyletravis.com>
+
+ENV MAKEOPTS="-j32"
+ENV GIT="/usr/local/bin/git"
+ENV GITCLONE="${GIT} clone -j8"
 
 # install document with yum
 RUN sed -i 's/tsflags=nodocs//g' /etc/yum.conf
@@ -19,7 +20,7 @@ RUN yum install -y epel-release && \
  thrift-devel libyaml-devel libevent-devel bzip2-devel openssl-devel \
  openldap-devel protobuf-devel readline-devel net-snmp-devel apr-devel \
  libesmtp-devel libxerces-c-dev xerces-c-devel python-pip json-c-devel libhdfs3-devel \
- apache-ivy java-1.6.0-openjdk-devel java-1.7.0-openjdk-devel gettext \
+ apache-ivy java-1.6.0-openjdk-devel java-1.7.0-openjdk-devel gettext perl-devel \
  openssh-clients openssh-server && \
  yum clean all
 
@@ -40,7 +41,7 @@ RUN wget https://cmake.org/files/v3.6/cmake-3.6.1.tar.gz && \
  make install
 
 # install google test package
-RUN ${GIT} https://github.com/google/googletest.git && \
+RUN ${GITCLONE} https://github.com/google/googletest.git && \
  cd googletest && \
  mkdir build && cd build && \
  cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. && make ${MAKEOPTS} all install
@@ -58,7 +59,7 @@ RUN echo "#!/bin/sh" > /etc/profile.d/java.sh && \
 
 # install libyarn
 RUN mkdir -p /tmp/build && cd /tmp/build && \
- ${GIT} https://github.com/apache/incubator-hawq.git && \
+ ${GITCLONE} https://github.com/apache/incubator-hawq.git && \
  cd /tmp/build/incubator-hawq/depends/libyarn && \
  mkdir build && cd build && \
  ../bootstrap --prefix=/usr && make ${MAKEOPTS} && make install && ldconfig && \
@@ -85,11 +86,11 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
  chmod 0600 ~/.ssh/authorized_keys
 
 # build hawq
-RUN ${GIT} --recursive https://github.com/apache/incubator-hawq.git /tmp/incubator-hawq && \
+RUN ${GITCLONE} --recursive https://github.com/apache/incubator-hawq.git /tmp/incubator-hawq && \
+ cd /tmp/incubator-hawq/depends/thirdparty/gp-xerces/src && mkdir port && cp /tmp/incubator-hawq/src/port/* ./port/ && \
  cd /tmp/incubator-hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
- make ${MAKEOPTS} && \
- make install && \
+ make ${MAKEOPTS} install && \
  rm -rf /tmp/incubator-hawq && \
  sed 's|localhost|centos7-namenode|g' -i /data/hawq-devel/etc/hawq-site.xml && \
  echo 'centos7-datanode1' >  /data/hawq-devel/etc/slaves && \
