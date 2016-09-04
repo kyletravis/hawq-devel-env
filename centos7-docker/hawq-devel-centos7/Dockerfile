@@ -21,7 +21,7 @@ RUN yum install -y epel-release && \
  openldap-devel protobuf-devel readline-devel net-snmp-devel apr-devel \
  libesmtp-devel libxerces-c-dev xerces-c-devel python-pip json-c-devel libhdfs3-devel \
  apache-ivy java-1.6.0-openjdk-devel java-1.7.0-openjdk-devel gettext perl-devel \
- openssh-clients openssh-server && \
+ openssh-clients openssh-server libhdfs && \
  yum clean all
 
 # install latest version of git
@@ -87,7 +87,11 @@ RUN ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa && \
 
 # build hawq
 RUN ${GITCLONE} --recursive https://github.com/apache/incubator-hawq.git /tmp/incubator-hawq && \
- cd /tmp/incubator-hawq/depends/thirdparty/gp-xerces/src && mkdir port && cp /tmp/incubator-hawq/src/port/* ./port/ && \
+# cd /tmp/incubator-hawq/depends/thirdparty && /usr/local/bin/git submodule init && /usr/local/bin/git submodule pull && \
+# cd /tmp/incubator-hawq/depends/thirdparty && git submodule add -f https://github.com/greenplum-db/gp-xerces.git && \
+# mkdir -p /tmp/incubator-hawq/depends/thirdparty/gp-xerces/build/src/port && \
+# cd /tmp/incubator-hawq/depends/thirdparty/gp-xerces/build/src && mkdir port && cp /tmp/incubator-hawq/src/port/* ./port/ && \
+# cp /tmp/incubator-hawq/src/port/* /tmp/incubator-hawq/depends/thirdparty/gp-xerces/build/src/port / && \
  cd /tmp/incubator-hawq && \
  ./configure --prefix=/data/hawq-devel --with-r --with-python --with-java --with-perl --with-pgcrypto --with-openssl --enable-orca && \
  make ${MAKEOPTS} install && \
